@@ -206,4 +206,8 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 mocks/
-.idea
+.idea/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
