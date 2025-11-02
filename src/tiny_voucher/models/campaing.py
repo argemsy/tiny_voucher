@@ -8,7 +8,10 @@ from django.db import models
 from django.utils import timezone
 
 # Own Libraries
-from src.tiny_voucher.models.base_model import AuditModel, SoftDeleteModel
+from src.tiny_voucher.models.base_model import (
+    AuditModel,
+    SoftDeleteModel,
+)
 from src.tiny_voucher.shared.enums import DiscountTypeEnum
 
 logger = structlog.getLogger(__name__)

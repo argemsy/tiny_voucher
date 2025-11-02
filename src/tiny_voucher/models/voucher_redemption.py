@@ -6,7 +6,10 @@ import structlog
 from django.db import models
 
 # Own Libraries
-from src.tiny_voucher.models.base_model import AuditModel, SoftDeleteModel
+from src.tiny_voucher.models.base_model import (
+    AuditModel,
+    SoftDeleteModel,
+)
 
 logger = structlog.getLogger(__name__)
 
