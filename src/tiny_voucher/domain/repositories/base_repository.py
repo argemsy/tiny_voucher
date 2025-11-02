@@ -2,10 +2,7 @@
 from abc import ABC
 from typing import Generic, Optional, Type, TypeVar
 
-# Own Libraries
-from src.tiny_voucher.domain.entities.base_entity import EntityBase
-
-_EntityT = TypeVar("_EntityT", bound=EntityBase)
+_EntityT = TypeVar("_EntityT")
 _ModelT = TypeVar("_ModelT")
 
 
