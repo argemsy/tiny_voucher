@@ -15,14 +15,17 @@ help: ## Show available commands
 
 # ------------------------------------------------------------------------------
 
-init: down prune build up ## Rebuild and start project cleanly
+init: down volume up ## Rebuild and start project cleanly
 
-up: ## Start all Docker services
+up: pull build ## Run all services
 	docker compose up -d
-	@make ps
+	make ps
 
 down: ## Stop and remove all Docker services
 	docker compose down --remove-orphans
+
+volume: ## Remove all containers volumes
+	docker volume prune -f
 
 build: ## Build or rebuild services
 	docker compose build
@@ -33,10 +36,10 @@ ps: ## Show running containers
 logs: ## Show service logs (use LOGS=srv-name for specific service)
 	docker compose logs -f $(LOGS)
 
-prune: ## Remove containers, volumes and dangling images
+prune: ## Remove all volumes, containers and services
+	make down
+	make volume
 	docker system prune -f
-	docker volume prune -f
-
 # ------------------------------------------------------------------------------
 
 migrate: ## Run Django migrations
@@ -102,3 +105,8 @@ fmt-dev: ## Auto-format code locally (Ruff fix + Black + Isort)
 	poetry run ruff check --fix src
 	poetry run isort src
 	poetry run black src
+
+fmt-test: ## Auto-format code locally (Ruff fix + Black + Isort)
+	poetry run ruff check --fix tests
+	poetry run isort tests
+	poetry run black tests

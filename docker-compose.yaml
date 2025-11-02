@@ -1,0 +1,122 @@
+version: "3.9"
+
+x-common:
+  default_environment_args: &default-environment-args
+    COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    DATABASE_URL: ${DATABASE_URL}
+    DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE}
+    SECRET_KEY: ${SECRET_KEY}
+    DJANGO_ALLOW_ASYNC_UNSAFE: ${DJANGO_ALLOW_ASYNC_UNSAFE}
+    PYTHONUNBUFFERED: 1
+    PYTHONDONTWRITEBYTECODE: 1
+    TZ: "America/Bogota"
+    AWS_ACCESS_KEY_ID: test
+    AWS_SECRET_ACCESS_KEY: test
+    AWS_REGION: us-east-1
+    LOCALSTACK_HOST: localstack
+    LOCALSTACK_PORT: 4566
+
+services:
+  api:
+    container_name: ${COMPOSE_PROJECT_NAME}_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      ssh: ["default"]
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+    env_file:
+      - docker.env
+    environment:
+      <<: *default-environment-args
+    command: >
+      uvicorn config.asgi:fastapp
+      --host 0.0.0.0
+      --port 9000
+      --reload
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+
+  web:
+    container_name: ${COMPOSE_PROJECT_NAME}_web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      ssh: ["default"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+    env_file:
+      - docker.env
+    environment:
+      <<: *default-environment-args
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+    command: >
+      bash -c "python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8000"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-tiny_voucher_db}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_localstack
+    restart: unless-stopped
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,sqs,sns
+      DEBUG: 1
+      DATA_DIR: /var/lib/localstack
+      DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    volumes:
+      - "./.localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal s3 ls || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg_data:
+  static_volume:
+  localstack:

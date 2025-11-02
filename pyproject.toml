@@ -9,7 +9,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "django (>=5.2.7,<6.0.0)",
-    "djangorestframework (>=3.16.1,<4.0.0)",
     "psycopg2-binary (>=2.9.11,<3.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
     "black (>=25.9.0,<26.0.0)",
@@ -22,8 +21,15 @@ dependencies = [
     "factory-boy (>=3.3.3,<4.0.0)",
     "coverage (>=7.10.7,<8.0.0)",
     "drf-spectacular (>=0.28.0,<0.29.0)",
-    "pydantic (==1.10)",
-    "structlog (>=25.4.0,<26.0.0)"
+    "pydantic (==2.7.0)",
+    "structlog (>=25.4.0,<26.0.0)",
+    "fastapi (>=0.119.0,<0.120.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "uvicorn (>=0.37.0,<0.38.0)",
+    "pytest-asyncio (>=1.2.0,<2.0.0)",
+    "awscli-local (>=0.22.2,<0.23.0)",
+    "dj-database-url (>=3.0.1,<4.0.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)"
 ]
 
 [tool.ruff]
@@ -50,12 +56,12 @@ ignore = [
     "E501",  # Line too long
     "E402",  # Module level import not at top of file
     "E731",  # Do not assign a lambda expression
-#    "B950",  # Line too long (superseded by E501)
     "B011",  # Do not call assert False
     "B014",  # Redundant exception
     "N812",  # Lowercase imported as non-lowercase
     "N804",  # Invalid class name
     "C901",  # Function too complex
+    "B008",
 ]
 
 per-file-ignores = { "config/settings/*" = ["F405"], "__init__.py" = ["F401"] }
@@ -127,3 +133,6 @@ build-backend = "poetry.core.masonry.api"
 dev = [
     "django-stubs (>=5.2.7,<6.0.0)"
 ]
+
+[tool.poetry]
+package-mode = false
